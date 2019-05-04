@@ -7,23 +7,18 @@
 #include <string.h>
 
 #define BUFF_SIZE 64
+#define UNIQ_SIZE 16384
 
 typedef struct			s_list
 {
 	char				*country;
 	size_t				sum;
 	int					count_uniq;
-	struct s_id_list	*id_list;
+	int					uniq[UNIQ_SIZE];
 	struct s_list		*next;
 }						t_list;
 
-typedef struct			s_id_list
-{
-	int					id;
-	struct s_id_list	*next;
-}						t_id_list;
-
-//TODO validation (1. strlen по id (5 символов))
+//TODO validation (1. strlen по id (5 символов) отрицательный id или 0 (служебный))
 
 char		*strnew(size_t size)
 {
@@ -89,15 +84,16 @@ char		*strsub(char const *s, unsigned int start, size_t len)
 		return (NULL);
 }
 
-t_id_list	*create_id_node(int id)
+void		uniq_init(int *array, int len)
 {
-	t_id_list	*temp;
+	int		i;
 
-	if (!(temp = (t_id_list *)malloc(sizeof(t_id_list))))
-		return (NULL);
-	temp->id = id;
-	temp->next = NULL;
-	return (temp);
+	i = 0;
+	while (i < len)
+	{
+		array[i] = 0;
+		i++;
+	}
 }
 
 t_list		*create_node(char const *country, size_t sum, int count_uniq)
@@ -111,7 +107,7 @@ t_list		*create_node(char const *country, size_t sum, int count_uniq)
 		temp->country = NULL;
 		temp->sum = 0;
 		temp->count_uniq = 0;
-		temp->id_list = NULL;
+		uniq_init(temp->uniq, UNIQ_SIZE);
 		temp->next = NULL;
 	}
 	else
@@ -124,23 +120,10 @@ t_list		*create_node(char const *country, size_t sum, int count_uniq)
 		strcpy(temp->country, country);
 		temp->sum = sum;
 		temp->count_uniq = count_uniq;
-		temp->id_list = NULL;
+		uniq_init(temp->uniq, UNIQ_SIZE);
 		temp->next = NULL;
 	}
 	return (temp);
-}
-
-void		add_id_node_back(t_id_list *begin, t_id_list *new)
-{
-	t_id_list	*temp;
-
-	if (begin && new)
-	{
-		temp = begin;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = new;
-	}
 }
 
 void		add_node_back(t_list *begin, t_list *new)
@@ -191,25 +174,56 @@ char		*split_reading(char **reading)
 	return (one_string);
 }
 
+int			count_uniq(int	*array)
+{
+	int		count;
+	int		i;
+
+	count = 0;
+	i = 0;
+	while (array[i] != 0)
+	{
+		count++;
+		i++;
+	}
+	return (count);
+}
+
+void		add_id(int *array, int id)
+{
+	int			flag;
+	int			i;
+
+	flag = 0;
+	i = 0;
+	while (array[i] != 0)
+	{
+		if (array[i] == id)
+		{
+			flag = 1;
+			break ;
+		}
+		i++;
+	}
+	if ((flag == 0) && (i < (UNIQ_SIZE - 1)))
+		array[i] = id;
+}
+
 void		fill_struct(t_list *list, char *str)
 {
-	t_id_list	*id_temp;
 	char		*temp;
 
-	temp = strrchr(str, ';');
-	list->country = ++temp;
-	temp = strchr(str, ';');
-	list->sum += atoi(++temp);
-	// if (list)
-	// {
-	// 	if (list->id_list == NULL)
-	// 	{
-	// 		list->id_list = create_id_node(atoi(one_string));
-	// 		id_temp = list->id_list;
-	// 	}
-	// 	else
-	// 		add_id_node_back(list->id_list, id_temp = create_id_node(atoi(one_string)));
-	// }
+	if (list != NULL)
+	{
+		if (list->country == NULL)
+		{
+			temp = strrchr(str, ';');
+			list->country = ++temp;
+		}
+		temp = strchr(str, ';');
+		list->sum += atoi(++temp);
+		add_id(list->uniq, atoi(str));
+	}
 }
 
 t_list		*find_node(t_list *begin, char *str)
@@ -229,11 +243,6 @@ t_list		*find_node(t_list *begin, char *str)
 	return (NULL);
 }
 
-// int			analyze_string(char *str)
-// {
-// 	return (strcmp(str, "user_id;count;country"));
-// }
-
 int		main(int argc, char **argv)
 {
 	int			fd;
@@ -241,21 +250,16 @@ int		main(int argc, char **argv)
 	char		*one_string;
 	t_list		*begin;
 	t_list		*temp;
+//	int			i = 0;
 
 	begin = NULL;
 	temp = NULL;
 	fd = open(argv[1], O_RDONLY);
 	if ((reading = read_file(fd)) == NULL)
 		return (-1); //TODO
-	// printf("1. reading = %s\n", reading);
-	// one_string = split_reading(&reading);
-	// printf("1. one_string = %s\n", one_string);
-	// printf("2. reading = %s\n", reading);
 	while (*reading != '\0')
 	{
-	//	if (analyze_string(one_string) == 0)
-			one_string = split_reading(&reading);
-		// printf("2. one_string = %s\n", one_string);
+		one_string = split_reading(&reading);
 		if (begin == NULL)
 		{
 			begin = create_node(NULL, 0, 0);
@@ -264,26 +268,21 @@ int		main(int argc, char **argv)
 		else
 		{
 			if ((temp = find_node(begin, one_string)) == NULL)
-				add_node_back(begin, temp = create_node("NULL", 0, 0));
+				add_node_back(begin, temp = create_node(NULL, 0, 0));
 		}
-		// if (find_node(begin) == NULL)
-		// 	add_node_back(begin, temp = create_node("NULL", 0, 0));
-		// else
-		// 	temp = find_node(begin);
 		fill_struct(temp, one_string);
 	}
-	while (begin)
+	temp = begin->next;
+	while (temp != NULL)
 	{
-		// id_temp = temp->id_list;
-		// while (id_temp)
+		printf("%s;%zu;%d\n", temp->country, temp->sum, temp->count_uniq = count_uniq(temp->uniq));
+		// i = 0;
+		// while (begin->uniq[i] != 0)
 		// {
-		// 	printf("%d\n", id_temp->id);
-		// 	id_temp = id_temp->next;
+		// 	printf("%d\n", begin->uniq[i]);
+		// 	i++;
 		// }
-		printf("%s , %zu, %d\n", begin->country, begin->sum, begin->count_uniq);
-		begin = begin->next;
+		temp = temp->next;
 	}
-	// printf("3. reading = %s\n", reading);
-	// printf("3. one_string = %s\n", one_string);
 	return (0);
 }

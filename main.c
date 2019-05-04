@@ -12,5 +12,6 @@ int		main()
 	// t = strchr(t, ';');
 	printf("%s\n", t);
 	printf("%d\n", atoi(t));
+	printf("%d\n", atoi(s));
 	return (0);
 }
