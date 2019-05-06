@@ -12,34 +12,17 @@ void		uniq_init(int *array, int len)
 	}
 }
 
-t_list		*create_node(char *country, size_t sum, int count_uniq)
+t_list		*create_node(void)
 {
 	t_list	*temp;
 
 	if (!(temp = (t_list *)malloc(sizeof(t_list))))
 		return (NULL);
-	if (country == NULL)
-	{
-		temp->country = NULL;
-		temp->sum = 0;
-		temp->count_uniq = 0;
-		uniq_init(temp->uniq, UNIQ_SIZE);
-		temp->next = NULL;
-	}
-	else
-	{
-		if (!(temp->country = (char *)malloc(sizeof(char)
-			* (strlen(country) + 1))))
-		{
-			free(temp);
-			return (NULL);
-		}
-		strcpy(temp->country, country);
-		temp->sum = sum;
-		temp->count_uniq = count_uniq;
-		uniq_init(temp->uniq, UNIQ_SIZE);
-		temp->next = NULL;
-	}
+	temp->country = NULL;
+	temp->sum = 0;
+	temp->count_uniq = 0;
+	uniq_init(temp->uniq, UNIQ_SIZE);
+	temp->next = NULL;
 	return (temp);
 }
 
@@ -85,7 +68,14 @@ void		fill_struct(t_list *list, char *str)
 		if (list->country == NULL)
 		{
 			temp = strrchr(str, ';');
-			list->country = ++temp;
+			++temp;
+			if (!(list->country = (char *)malloc(sizeof(char) * (strlen(temp) + 1))))
+			{
+				list->country = NULL;
+				return ;
+			}
+			else
+				strcpy(list->country, temp);
 		}
 		temp = strchr(str, ';');
 		list->sum += atoi(++temp);

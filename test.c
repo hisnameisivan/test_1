@@ -73,28 +73,39 @@ int			main(int argc, char **argv)
 			one_string = split_reading(&reading);
 			if (valid_simbols(one_string) == 0)
 			{
+				free(one_string);
 				one_string = split_reading(&reading);
 				if (one_string == NULL)
+				{
+					free(reading);
 					break ;
+				}
 			}
 			if (begin == NULL)
 			{
-				begin = create_node(NULL, 0, 0);
+				begin = create_node();
 				temp = begin;
 			}
 			else
 			{
 				if ((temp = find_node(begin, one_string)) == NULL)
-					add_node_back(begin, temp = create_node(NULL, 0, 0));
+					add_node_back(begin, temp = create_node());
 			}
 			fill_struct(temp, one_string);
+			free(one_string);
 		}
+		free(reading);
 		temp = begin;
 		while (temp != NULL)
 		{
-			printf("%s;%zu;%d\n", temp->country, temp->sum,
-				temp->count_uniq = count_uniq(temp->uniq));
-			temp = temp->next;
+			if (temp->country != NULL)
+				printf("%s;%zu;%d\n", temp->country, temp->sum,
+					temp->count_uniq = count_uniq(temp->uniq));
+			begin = temp->next;
+			if (temp->country != NULL)
+				free(temp->country);
+			free(temp);
+			temp = begin;
 		}
 		return (0);
 	}

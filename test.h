@@ -24,7 +24,7 @@ char		*strnew(size_t size);
 char		*strjoin(char *s1, char *s2);
 char		*strsub(char *s, unsigned int start, size_t len);
 void		uniq_init(int *array, int len);
-t_list		*create_node(char *country, size_t sum, int count_uniq);
+t_list		*create_node(void);
 void		add_node_back(t_list *begin, t_list *new);
 void		add_id(int *array, int id);
 void		fill_struct(t_list *list, char *str);
