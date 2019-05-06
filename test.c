@@ -1,6 +1,10 @@
 #include "test.h"
 
-char		*read_file(int fd)
+/*
+** Считывание содержания файла с файловым дескриптором fd в переменную reading.
+*/
+
+static char	*read_file(int fd)
 {
 	int		ret;
 	char	buf[BUFF_SIZE + 1];
@@ -18,7 +22,12 @@ char		*read_file(int fd)
 	return (reading);
 }
 
-char		*split_reading(char **reading)
+/*
+** Строка (символы до '\n') из reading помещается в one_string. Функция
+** "нарезает" reading на отдельные строки.
+*/
+
+static char	*split_reading(char **reading)
 {
 	char	*temp;
 	char	*one_string;
@@ -35,7 +44,11 @@ char		*split_reading(char **reading)
 	return (one_string);
 }
 
-int			count_uniq(int *array)
+/*
+** Подсчет уникальных id для страны country.
+*/
+
+static int	count_uniq(int *array)
 {
 	int		count;
 	int		i;
@@ -49,6 +62,23 @@ int			count_uniq(int *array)
 	}
 	return (count);
 }
+
+/*
+** Программа рассчитана на работу с одним аргументом (имя файла). Подаваемый
+** файл открывается open. По файловому дескриптору fd происходит считывание
+** содержания файла целиком в reading. Далее split_reading "нарезает" reading
+** по одной строке в one_string. Каждая строка one_string проходит валидацию.
+** Если строка корректна, то мы ищем в списке узел, соответствующий стране
+** country из one_string. Если такого узла нет, то создаем его и отправляем в
+** конец односвязного списка. Далее происходит запись интересующей нас инфор-
+** мации о стране в поля структуры (узла). Когда весь контент обработан (сим-
+** волы в reading закончились). Последним шагом является проход по получивше-
+** муся односвязному списку и вывод информации. Подсчет уникальных id происхо-
+** дит на этом же шаге.
+** Предусмотрены сообщения об ошибках ввода.
+** Вся выделенная память очищена (valgrind definitely lost: 0 bytes in 0
+** blocks).
+*/
 
 int			main(int argc, char **argv)
 {
@@ -71,15 +101,12 @@ int			main(int argc, char **argv)
 		while (*reading != '\0')
 		{
 			one_string = split_reading(&reading);
-			if (valid_simbols(one_string) == 0)
+			while (valid_simbols(one_string) == 0)
 			{
 				free(one_string);
 				one_string = split_reading(&reading);
 				if (one_string == NULL)
-				{
-					free(reading);
 					break ;
-				}
 			}
 			if (begin == NULL)
 			{
@@ -92,9 +119,9 @@ int			main(int argc, char **argv)
 					add_node_back(begin, temp = create_node());
 			}
 			fill_struct(temp, one_string);
-			free(one_string);
+			strdel(&one_string);
 		}
-		free(reading);
+		strdel(&reading);
 		temp = begin;
 		while (temp != NULL)
 		{
@@ -103,10 +130,11 @@ int			main(int argc, char **argv)
 					temp->count_uniq = count_uniq(temp->uniq));
 			begin = temp->next;
 			if (temp->country != NULL)
-				free(temp->country);
+				strdel(&(temp->country));
 			free(temp);
 			temp = begin;
 		}
+		temp = NULL;
 		return (0);
 	}
 	else

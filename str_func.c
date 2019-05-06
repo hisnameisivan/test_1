@@ -1,5 +1,10 @@
 #include "test.h"
 
+/*
+** Функция выделяет память (с пом. malloc) под строку длины (size + 1)
+** заполненную '\0'.
+*/
+
 char		*strnew(size_t size)
 {
 	char	*temp;
@@ -15,6 +20,10 @@ char		*strnew(size_t size)
 	}
 	return (temp);
 }
+
+/*
+** Функция выделяет память (с пом. malloc) под строку состоящую из s1 и s2.
+*/
 
 char		*strjoin(char *s1, char *s2)
 {
@@ -42,6 +51,11 @@ char		*strjoin(char *s1, char *s2)
 	return (temp);
 }
 
+/*
+** Функция выделяет память (с пом. malloc) под строку, образованную из
+** участка строки s с позиции start длины len.
+*/
+
 char		*strsub(char *s, unsigned int start, size_t len)
 {
 	char	*temp;
@@ -62,4 +76,18 @@ char		*strsub(char *s, unsigned int start, size_t len)
 	}
 	else
 		return (NULL);
+}
+
+/*
+** Функция освобождает выделенную под строку s память (с пом. free)
+** и "зануляет" указатель s.
+*/
+
+void		strdel(char **s)
+{
+	if (s != NULL)
+	{
+		free(*s);
+		*s = NULL;
+	}
 }

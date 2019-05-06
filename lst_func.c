@@ -1,5 +1,10 @@
 #include "test.h"
 
+/*
+** Заполнение поля структуры нулями (все элементы массива uniq[UNIQ_SIZE] в
+** узле будут равны нулю).
+*/
+
 void		uniq_init(int *array, int len)
 {
 	int		i;
@@ -11,6 +16,10 @@ void		uniq_init(int *array, int len)
 		i++;
 	}
 }
+
+/*
+** Создание узла (с пом. malloc) в односвязном списке (без добавления в список).
+*/
 
 t_list		*create_node(void)
 {
@@ -26,6 +35,10 @@ t_list		*create_node(void)
 	return (temp);
 }
 
+/*
+** Добавление узла в конец односвязного списка.
+*/
+
 void		add_node_back(t_list *begin, t_list *new)
 {
 	t_list	*temp;
@@ -38,6 +51,10 @@ void		add_node_back(t_list *begin, t_list *new)
 		temp->next = new;
 	}
 }
+
+/*
+** Добавление информации об уникальном id в структуру.
+*/
 
 void		add_id(int *array, int id)
 {
@@ -59,6 +76,10 @@ void		add_id(int *array, int id)
 		array[i] = id;
 }
 
+/*
+** Заполнение структуры информацией из txt файла.
+*/
+
 void		fill_struct(t_list *list, char *str)
 {
 	char	*temp;
@@ -69,7 +90,8 @@ void		fill_struct(t_list *list, char *str)
 		{
 			temp = strrchr(str, ';');
 			++temp;
-			if (!(list->country = (char *)malloc(sizeof(char) * (strlen(temp) + 1))))
+			if (!(list->country = (char *)malloc(sizeof(char)
+				* (strlen(temp) + 1))))
 			{
 				list->country = NULL;
 				return ;
@@ -82,6 +104,10 @@ void		fill_struct(t_list *list, char *str)
 		add_id(list->uniq, atoi(str));
 	}
 }
+
+/*
+** Поиск узла содержащего информацию о стране country.
+*/
 
 t_list		*find_node(t_list *begin, char *str)
 {

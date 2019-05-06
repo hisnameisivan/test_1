@@ -1,4 +1,5 @@
 #ifndef TEST_H
+# define TEST_H
 
 # include <sys/types.h>
 # include <sys/stat.h>
@@ -10,6 +11,15 @@
 
 # define BUFF_SIZE 64
 # define UNIQ_SIZE 16384
+
+/*
+** Структура:
+**	Название страны
+**	Сумма по count (по заданию)
+**	Число уникальных user_id для country (по заданию)
+**	Массив уникальных id
+**	Указатель на следующий элемент s_list
+*/
 
 typedef struct			s_list
 {
@@ -23,6 +33,7 @@ typedef struct			s_list
 char		*strnew(size_t size);
 char		*strjoin(char *s1, char *s2);
 char		*strsub(char *s, unsigned int start, size_t len);
+void		strdel(char **s);
 void		uniq_init(int *array, int len);
 t_list		*create_node(void);
 void		add_node_back(t_list *begin, t_list *new);
