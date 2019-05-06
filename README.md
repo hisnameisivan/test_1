@@ -16,5 +16,5 @@ country;sum(count) (сумма по count);count_uniq(user_id) (число ун�
 Запуск:  
 ```
 make 
-./test test.text
+./test test.txt
 ```
